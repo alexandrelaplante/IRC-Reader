@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="org.apache.cordova.plugin.irc"
+    version="0.2.0">
+  
+  <name>TTS</name>
+  <description>Cordova IRC Plugin</description>
+  <license>Apache 2.0</license>
+  <keywords>cordova,irc</keywords>
+  
+  <js-module src="www/cordovairc.js" name="cordovairc">
+    <clobbers target="window.plugins.irc" />
+  </js-module>
+  
+  <!-- android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="CordovaIrc">
+        <param name="android-package" value="org.apache.cordova.plugin.irc.CordovaIrc"/>
+      </feature>
+    </config-file>
+    
+    <source-file src="src/android/irc/constants.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+    <source-file src="src/android/irc/CordovaIrc.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+    <source-file src="src/android/irc/IrcClient.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+    <source-file src="src/android/irc/IrcThread.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+    <source-file src="src/android/irc/MainActivity.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+    <source-file src="src/android/irc/ThreadBridge.java" target-dir="src/org/apache/cordova/plugin/irc/" />
+
+    <source-file src="src/android/pircbot.jar" target-dir="libs" />
+    
+  </platform>
+  
+</plugin>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+        <title>Hello World</title>
+        <link rel="stylesheet" href="css/ionic.min.css">
+        <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+        
+    </head>
+    <body>
+        <div class="ionic-body">
+
+
+            <div class="connection-form">
+                <div class="list list-inset">
+                  <label class="item item-input">
+                    <input id="username" type="text" placeholder="username">
+                  </label>
+                  <label class="item item-input">
+                    <input id="password" type="text" placeholder="password">
+                  </label>
+                  <label class="item item-input">
+                    <input id="channel" type="text" placeholder="#channel">
+                  </label>
+                  <label class="item item-input">
+                    <input id="server" type="text" placeholder="server">
+                  </label>
+                  <label class="item item-input">
+                    <input id="port" type="text" placeholder="port">
+                  </label>
+                </div>
+                <div class="padding">
+                    <a href="#" class="button button-block button-positive" id="connect">Connect</a><br/>
+                </div>
+            </div>
+
+            <div class="connected" style="display:none">
+
+                <div class="bar bar-header bar-positive">
+                  <h1 class="title"></h1>
+                </div>
+
+                <div id="irc-box" class="content"></div>
+
+                <div class="bar bar-footer bar-positive">
+                    <label class="item-input-wrapper">
+                      <input id="message" type="text" placeholder="type message" value="">
+                    </label>
+                    <button class="button button-small" id="send">
+                      Send
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--
+        -->
+        <script type="text/javascript" src="phonegap.js"></script>
+        <script type="text/javascript" charset="utf-8" src="tts.js"></script>
+        <script type="text/javascript" charset="utf-8" src="cordovairc.js"></script>
+        <script type="text/javascript">
+
+            function startupWin(result) {
+                if (result == 2) { //TTS.STARTED==2
+                    //TTS is ready
+                }
+            }                               
+
+            function fail(result) {
+                alert("Error = " + result);
+            }
+
+            function remove_prefix(name){
+                if ((name.charAt(0) == '~') ||
+                    (name.charAt(0) == '&') ||
+                    (name.charAt(0) == '@') ||
+                    (name.charAt(0) == '%') ||
+                    (name.charAt(0) == '+')){
+                    return name.substring(1);
+                }
+
+                return name;
+            }
+
+
+            $(function() {
+                function callback (answer) {
+
+                    var result = JSON.stringify(answer);
+                    if (answer.constructor == String){
+                        result = "<span style='color:green'>"+answer+"</span>";
+                    }
+
+                    var speak = result;
+                    if (answer.message) {
+                        speak = remove_prefix(answer.sender) + " says " + answer.message;
+                        result = "<span style='color:red'>" + answer.sender + "</span>: " + answer.message;
+                    }
+
+                    $('#irc-box').append('<br/>'+result);
+
+                    $("#irc-box").animate({ scrollTop: $(document).height() }, "slow");
+
+                    navigator.tts.speak(speak);
+                }
+                $('#connect').click(function(){
+                    var args = [{
+                        username : $('#username').val(),
+                        password : $('#password').val(),
+                        channel : $('#channel').val(),
+                        server : $('#server').val(),
+                        port : $('#port').val(),
+                    }];
+
+                    window.localStorage.setItem("username", $('#username').val());
+                    window.localStorage.setItem("password", $('#password').val());
+                    window.localStorage.setItem("channel", $('#channel').val());
+                    window.localStorage.setItem("server", $('#server').val());
+                    window.localStorage.setItem("port", $('#port').val());
+
+                    $('h1').text( $('#channel').val() + ' ' + $('#server').val() );
+
+                    window.plugins.irc.connect(callback, args);
+
+                    $('.connection-form').hide();
+                    $('.connected').show();
+                });
+                $('#send').click(function(){
+                    var message = $('#message').val();
+
+                    window.plugins.irc.send([{'contents' : message}]);
+
+                    var result = "<span style='color:red'>" + $('#username').val() + "</span>: " + message;
+
+                    $('#irc-box').append('<br/>'+result);
+                    $('#message').val('');
+
+                    $("#irc-box").animate({ scrollTop: $(document).height() }, "slow");
+
+                    navigator.tts.speak(speak);
+                });
+
+                document.addEventListener("deviceready", function(){
+                    navigator.tts.startup(startupWin, fail);
+
+                    $('#username').val(window.localStorage.getItem("username") || 'IRCreader123');
+                    $('#password').val(window.localStorage.getItem("password") || '');
+                    $('#channel').val(window.localStorage.getItem("channel") || '#android');
+                    $('#server').val(window.localStorage.getItem("server") || 'irc.freenode.net');
+                    $('#port').val(window.localStorage.getItem("port") || '6667');
+
+                }, false);
+            });
+            
+        </script>
+        <style>
+        html, body, .ionic-body{
+            height:100%;
+            margin:0;
+            padding:0;
+        }
+        #irc-box{
+            position:absolute;
+            bottom:0;
+            padding: 30px 10px 50px 10px;
+            overflow-y: scroll;
+            height:100%;
+            width:100%;
+
+        }
+        </style>
+    </body>
+</html>
