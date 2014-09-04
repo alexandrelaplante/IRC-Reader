@@ -106,11 +106,11 @@
                 function callback (answer) {
 
                     var result = JSON.stringify(answer);
+                    var speak = result;
                     if (answer.constructor == String){
                         result = "<span style='color:green'>"+answer+"</span>";
                     }
 
-                    var speak = result;
                     if (answer.message) {
                         speak = remove_prefix(answer.sender) + " says " + answer.message;
                         result = "<span style='color:red'>" + answer.sender + "</span>: " + answer.message;
@@ -156,7 +156,6 @@
 
                     $("#irc-box").animate({ scrollTop: $(document).height() }, "slow");
 
-                    navigator.tts.speak(speak);
                 });
 
                 document.addEventListener("deviceready", function(){
